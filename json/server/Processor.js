@@ -8,14 +8,16 @@ class JsonProcessor extends HashBrown.Models.Processor {
     /**
      * Compiles content as JSON
      *
+     * @param {String} project
+     * @param {String} environment
      * @param {Content} content
      * @param {String} language
      *
      * @returns {Promise} Result
      */
-    process(content, language) {
-        checkParam(content, 'content', HashBrown.Models.Content);
-        checkParam(language, 'language', String);
+    async process(project, environment, content, language) {
+        checkParam(project, 'project', String);
+        checkParam(environment, 'environment', String);
 
         let properties = content.getLocalizedProperties(language);
         let meta = content.getMeta();

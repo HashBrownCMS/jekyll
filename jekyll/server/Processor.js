@@ -10,12 +10,16 @@ class JekyllProcessor extends HashBrown.Models.Processor {
     /**
      * Compiles content for Jekyll
      *
+     * @param {String} project
+     * @param {String} environment
      * @param {Content} content
      * @param {String} language
      *
      * @returns {Promise} Result
      */
-    process(content, language) {
+    async process(project, environment, content, language) {
+        checkParam(project, 'project', String);
+        checkParam(environment, 'environment', String);
         checkParam(content, 'content', HashBrown.Models.Content);
         checkParam(language, 'language', String);
 

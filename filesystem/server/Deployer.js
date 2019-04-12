@@ -123,7 +123,7 @@ class FileSystemDeployer extends HashBrown.Models.Deployer {
         return new Promise((resolve, reject) => {
             let dirPath = Path.dirname(path);
 
-            HashBrown.Helpers.MediaHelper.mkdirRecursively(dirPath);
+            HashBrown.Helpers.FileHelper.makeDirectory(dirPath);
 
             debug.log('Writing file "' + path + '"...', this);
 

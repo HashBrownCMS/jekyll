@@ -1,9 +1,6 @@
 'use strict';
 
-const FileSystem = require('fs');
-const Glob = require('glob');
 const Path = require('path');
-const RimRaf = require('rimraf');
 
 /**
  * Git deployer

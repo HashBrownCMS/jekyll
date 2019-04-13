@@ -1,9 +1,7 @@
 'use strict';
 
-const FileSystem = require('fs');
 const Path = require('path');
 const Glob = require('glob');
-const RimRaf = require('rimraf');
 
 /**
  * FileSystem deployer
@@ -47,45 +45,42 @@ class FileSystemDeployer extends HashBrown.Models.Deployer {
      *
      * @return {Promise} Promise
      */
-    getFile(path) {
-        return new Promise((resolve, reject) => {
-            FileSystem.readFile(path, (err, data) => {
-                if(err) {
-                    reject(err);
-                
-                } else {
-                    resolve({
-                        name: Path.basename(path),
-                        path: path,
-                        data: data.toString('utf8')
-                    });
-                }
-            });
-        });
+    async getFile(path) {
+        let data = await HashBrown.Helpers.FileHelper.read(path);
+        
+        return {
+            name: Path.basename(path),
+            path: path,
+            data: data.toString('utf8')
+        };
     }
     
     /**
      * Gets a folder
      *
      * @param {String} path
-     * @param {Number} levels
+     * @param {Number} recursions
      *
      * @returns {Promise} Result
      */
-    getFolder(path, levels = 1) {
-        if(levels < 1) { levels = 1; }
-
-        for(let i = 0; i < levels; i++) {
+    async getFolder(path, recursions = 0) {
+        for(let i = 0; i < recursions; i++) {
             path = Path.join(path, '*');
         }
 
-        return new Promise((resolve, reject) => {
-            Glob(path, (err, data) => {
-                if(err) { return reject(err); }
-                
-                resolve(data);
-            });
-        });
+        let files = await HashBrown.Helpers.FileHelper.list(path);
+        
+        for(let i = 0; i < files.length; i++) {
+            let fullPath = files[i];
+            let relativePath = fullPath.replace(this.getRootPath(), '');
+
+            files[i] = {
+                name: Path.basename(relativePath),
+                path: fullPath
+            };
+        }
+
+        return files;
     }
     
     /**
@@ -96,19 +91,10 @@ class FileSystemDeployer extends HashBrown.Models.Deployer {
      *
      * @return {Promise} Promise
      */
-    renameFile(oldPath, name) {
+    async renameFile(oldPath, name) {
         let newPath = Path.join(Path.dirname(oldPath), name);
         
-        return new Promise((resolve, reject) => {
-            FileSystem.rename(oldPath, newPath, (err) => {
-                if(err) {
-                    reject(err);
-                } else {
-                    resolve();
-                    debug.log('Renamed file successfully to ' + newPath, this);
-                }
-            });
-        });
+        await HashBrown.Helpers.FileHelper.move(oldPath, newPath);
     }
     
     /**
@@ -119,25 +105,16 @@ class FileSystemDeployer extends HashBrown.Models.Deployer {
      *
      * @return {Promise} Promise
      */
-    setFile(path, base64) {
-        return new Promise((resolve, reject) => {
-            let dirPath = Path.dirname(path);
+    async setFile(path, base64) {
+        let dirPath = Path.dirname(path);
 
-            HashBrown.Helpers.FileHelper.makeDirectory(dirPath);
+        HashBrown.Helpers.FileHelper.makeDirectory(dirPath);
 
-            debug.log('Writing file "' + path + '"...', this);
+        debug.log('Writing file "' + path + '"...', this);
 
-            let fileData = Buffer.from(base64, 'base64');
+        let fileData = Buffer.from(base64, 'base64');
 
-            FileSystem.writeFile(path, fileData, (err) => {
-                if(err) {
-                    reject(err);
-                } else {
-                    resolve();
-                    debug.log('Uploaded file successfully to ' + path, this);
-                }
-            });
-        });
+        await HashBrown.Helpers.FileHelper.write(fileData, path);
     }
    
     /**
@@ -148,15 +125,7 @@ class FileSystemDeployer extends HashBrown.Models.Deployer {
      * @return {Promise} Promise
      */
     removeFile(path) {
-        return new Promise((resolve, reject) => {
-            RimRaf(path, (err) => {
-                if(err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
-        });
+        return HashBrown.Helpers.FileHelper.remove(path);
     }
 
     /**

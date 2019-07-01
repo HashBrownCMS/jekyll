@@ -3,8 +3,7 @@
 const Yaml = require('./lib/yamljs/Yaml');
 
 class JekyllProcessor extends HashBrown.Models.Processor {
-    // Getters
-    static get name() { return 'Jekyll'; }
+    static get title() { return 'Jekyll'; }
     static get alias() { return 'jekyll'; }
     
     /**

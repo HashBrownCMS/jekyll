@@ -1,0 +1,8 @@
+{
+    "name": "Jekyll",
+    "description": "Processor for outputting content in a Jekyll compatible YAML format",
+    "repository": "https://github.com/HashBrownCMS/jekyll.git",
+    "version": "1.4.0",
+    "author": "Jeppe Zapp",
+    "license": "MIT"
+}
